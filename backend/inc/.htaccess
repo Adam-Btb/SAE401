@@ -1,0 +1,3 @@
+# Deny direct access to include files
+Order Allow,Deny
+Deny from all

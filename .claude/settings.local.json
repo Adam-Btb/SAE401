@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/xamp/htdocs/sae401/frontend -not -path */node_modules/* -type d)"
+    ]
+  }
+}

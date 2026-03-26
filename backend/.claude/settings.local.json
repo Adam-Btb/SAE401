@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l index.php)",
+      "Bash(php -l class/Utilisateur.class.php)",
+      "Bash(php -l class/Vues.class.php)",
+      "Bash(php -l class/Langue.class.php)",
+      "Bash(\"E:/xamp/php/php.exe\" -l \"E:/xamp/htdocs/SAE401/index.php\")",
+      "Bash(\"E:/xamp/php/php.exe\" -l \"E:/xamp/htdocs/SAE401/class/Utilisateur.class.php\")",
+      "Bash(\"E:/xamp/php/php.exe\" -l \"E:/xamp/htdocs/SAE401/class/Vues.class.php\")",
+      "Bash(\"E:/xamp/php/php.exe\" -l \"E:/xamp/htdocs/SAE401/class/Langue.class.php\")"
+    ]
+  }
+}
