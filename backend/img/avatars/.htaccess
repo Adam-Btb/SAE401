@@ -1,5 +1,0 @@
-# Deny execution of PHP files in this directory
-<Files "*.php">
-    Order Allow,Deny
-    Deny from all
-</Files>
