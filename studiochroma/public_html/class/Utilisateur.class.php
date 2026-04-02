@@ -28,12 +28,18 @@ class Utilisateur {
         $req->execute([':e' => $data['email']]);
         if ($req->fetch()) return ['ok' => false, 'msg' => 'error_email_taken'];
 
-        $photo = 'default.png';
+        $photo = 'default.webp';
         if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                $photo = uniqid('avatar_') . '.' . $ext;
-                move_uploaded_file($_FILES['photo']['tmp_name'], 'img/avatars/' . $photo);
+                $newName = uniqid('avatar_') . '.' . $ext;
+                $targetDir = __DIR__ . '/../img/avatars';
+                if (!is_dir($targetDir)) mkdir($targetDir, 0775, true);
+                if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetDir . '/' . $newName)) {
+                    $photo = $newName;
+                } else {
+                    error_log('[StudioChroma] Avatar upload failed for ' . $_FILES['photo']['name'] . ' → ' . $targetDir);
+                }
             }
         }
 
@@ -129,11 +135,16 @@ class Utilisateur {
         if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                $photo = uniqid('avatar_') . '.' . $ext;
-                move_uploaded_file($_FILES['photo']['tmp_name'], 'img/avatars/' . $photo);
-                $photoSQL = ', photo_profil = :photo';
-                $params[':photo'] = $photo;
-                $_SESSION['user_photo'] = $photo;
+                $newName = uniqid('avatar_') . '.' . $ext;
+                $targetDir = __DIR__ . '/../img/avatars';
+                if (!is_dir($targetDir)) mkdir($targetDir, 0775, true);
+                if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetDir . '/' . $newName)) {
+                    $photoSQL = ', photo_profil = :photo';
+                    $params[':photo'] = $newName;
+                    $_SESSION['user_photo'] = $newName;
+                } else {
+                    error_log('[StudioChroma] Avatar update failed → ' . $targetDir);
+                }
             }
         }
 
@@ -210,16 +221,13 @@ class Utilisateur {
     }
 
     public function getPublications($userId, $amisIds = []) {
-        $ids = array_merge([$userId], $amisIds);
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $sql = "SELECT p.*, u.pseudonyme, u.photo_profil
                 FROM publications p
                 JOIN utilisateurs u ON p.auteur_id = u.id
-                WHERE p.auteur_id IN ($placeholders)
                 ORDER BY p.date_publication DESC
                 LIMIT 50";
         $req = $this->cnx->prepare($sql);
-        $req->execute($ids);
+        $req->execute();
         return $req->fetchAll();
     }
 
@@ -231,11 +239,17 @@ class Utilisateur {
             $ext = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
                 $imageUrl = uniqid('post_') . '.' . $ext;
-                if (!is_dir('img/uploads/publications')) {
-                    mkdir('img/uploads/publications', 0777, true);
+                $targetDir = __DIR__ . '/../img/uploads/publications';
+                if (!is_dir($targetDir)) {
+                    mkdir($targetDir, 0775, true);
                 }
-                move_uploaded_file($fileData['tmp_name'], 'img/uploads/publications/' . $imageUrl);
+                if (!move_uploaded_file($fileData['tmp_name'], $targetDir . '/' . $imageUrl)) {
+                    error_log('[StudioChroma] Publication image upload failed → ' . $targetDir . '/' . $imageUrl);
+                    $imageUrl = null;
+                }
             }
+        } elseif (!empty($fileData['error']) && $fileData['error'] !== UPLOAD_ERR_NO_FILE) {
+            error_log('[StudioChroma] Upload error code: ' . $fileData['error']);
         }
 
         $req = $this->cnx->prepare("INSERT INTO publications (auteur_id, contenu, image_url) VALUES (:uid, :contenu, :img)");

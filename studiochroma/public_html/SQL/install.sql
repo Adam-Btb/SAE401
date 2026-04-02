@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS utilisateurs (
     pseudonyme VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(191) NOT NULL UNIQUE,
     mot_de_passe VARCHAR(255) NOT NULL,
-    photo_profil VARCHAR(255) DEFAULT 'default.png',
+    photo_profil VARCHAR(255) DEFAULT 'default.webp',
     langues_parlees VARCHAR(255) DEFAULT '',
     nationalite VARCHAR(100) DEFAULT '',
     date_naissance DATE DEFAULT NULL,

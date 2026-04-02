@@ -13,6 +13,12 @@ class Vues
     {
         return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     }
+    private function avatar($photo)
+    {
+        $f = $photo ?: 'default.webp';
+        $path = __DIR__ . '/../img/avatars/' . $f;
+        return file_exists($path) ? $f : 'default.webp';
+    }
 
     public function debutHtml($titre, $connecte = false)
     {
@@ -48,17 +54,16 @@ class Vues
         echo '<nav class="topnav-nav">';
         if ($connecte) {
             $navItems = [
-                ['action' => 'feed', 'label' => $this->t('feed')],
-                ['action' => 'messages', 'label' => $this->t('messages')],
-                ['action' => 'agenda', 'label' => $this->t('events')],
-                ['action' => 'amis', 'label' => $this->t('friends')],
-                ['action' => 'profil', 'label' => $this->t('nav_profile')],
+                ['action' => 'feed', 'label' => $this->t('feed'), 'icon' => ''],
+                ['action' => 'messages', 'label' => $this->t('messages'), 'icon' => ''],
+                ['action' => 'agenda', 'label' => $this->t('events'), 'icon' => ''],
+                ['action' => 'profil', 'label' => '', 'icon' => '<img src="img/profile.png" alt="Profile" style="height: 24px;">'],
             ];
             foreach ($navItems as $item) {
                 $isActive = ($action === $item['action']) ? ' active' : '';
                 echo '<a href="index.php?action=' . $item['action'] . '&lang=' . $lang . '" class="tnav-item' . $isActive . '">';
-                echo '<span class="tnav-icon">' . $item['icon'] . '</span>';
-                echo '<span>' . $item['label'] . '</span>';
+                if ($item['icon']) echo '<span class="tnav-icon">' . $item['icon'] . '</span>';
+                if ($item['label']) echo '<span>' . $item['label'] . '</span>';
                 if ($item['action'] === 'messages' && $nonLus > 0) {
                     echo '<span class="tnav-badge">' . $nonLus . '</span>';
                 }
@@ -83,10 +88,14 @@ class Vues
         echo '<div class="topnav-actions">';
 
         echo '<div class="lang-switcher">';
+        echo '<img src="img/language.png" alt="Language" class="lang-icon" onclick="document.getElementById(\'lang-dropdown\').classList.toggle(\'show\'); event.stopPropagation();">';
+        echo '<div id="lang-dropdown" class="lang-dropdown">';
         foreach (Langue::getAll() as $l) {
-            $active = ($l === $lang) ? ' active' : '';
-            echo '<a href="index.php?lang=' . $l . '&action=' . $this->esc($action) . '" class="lang-btn' . $active . '">' . strtoupper($l) . '</a>';
+            $cls = ($l === $lang) ? ' lang-active' : '';
+            echo '<a href="index.php?lang=' . $l . '&action=' . $this->esc($action) . '" class="lang-option' . $cls . '">' . strtoupper($l) . '</a>';
         }
+        echo '</div>';
+        echo '<script>document.addEventListener("click", function(event) { var d = document.getElementById("lang-dropdown"); if(d && !event.target.closest(".lang-switcher")) d.classList.remove("show"); });</script>';
         echo '</div>';
 
         if ($connecte) {
@@ -98,7 +107,7 @@ class Vues
             echo '<input type="text" name="q" placeholder="' . $this->t('search') . '...">';
             echo '</form>';
 
-            echo '<a href="index.php?action=deconnexion" class="btn-logout">' . $this->t('logout') . '</a>';
+            echo '<a href="index.php?action=deconnexion" class="btn-logout" title="' . $this->t('logout') . '" style="display:flex; align-items:center; background:none; border:none; padding:0; outline:none;"><img src="img/se-deco.png" alt="Logout" style="height:24px;"></a>';
         } else {
             echo '<a href="index.php?action=inscription&lang=' . $lang . '" class="topnav-cta"><span>' . $this->t('signup') . '</span></a>';
             echo '<a href="index.php?action=connexion&lang=' . $lang . '" class="btn-secondary btn-pill" style="padding:8px 18px;font-size:14px;min-height:42px;">' . $this->t('login') . '</a>';
@@ -114,14 +123,13 @@ class Vues
                 ['action' => 'feed', 'icon' => '&#127968;', 'label' => $this->t('feed')],
                 ['action' => 'messages', 'icon' => '&#9993;', 'label' => $this->t('messages')],
                 ['action' => 'agenda', 'icon' => '&#128197;', 'label' => $this->t('events')],
-                ['action' => 'amis', 'icon' => '&#128101;', 'label' => $this->t('friends')],
-                ['action' => 'profil', 'icon' => '&#128100;', 'label' => $this->t('nav_profile')],
+                ['action' => 'profil', 'icon' => '<img src="img/profile.png" alt="Profile" style="height:24px; vertical-align:middle;">', 'label' => ''],
             ];
             foreach ($mobileNav as $item) {
                 $isActive = ($action === $item['action']) ? ' active' : '';
                 echo '<a href="index.php?action=' . $item['action'] . '&lang=' . $lang . '" class="bnav-item' . $isActive . '">';
                 echo '<span style="font-size:22px;">' . $item['icon'] . '</span>';
-                echo '<span>' . $item['label'] . '</span>';
+                if ($item['label']) echo '<span>' . $item['label'] . '</span>';
                 echo '</a>';
             }
             echo '</nav>';
@@ -256,15 +264,30 @@ class Vues
         if ($success)
             echo '<div class="alert alert-success">' . $this->t($success) . '</div>';
 
+        // Progress bar
+        echo '<div class="signup-progress">';
+        echo '<div class="progress-step active" data-step="1"><span class="step-num">1</span><span class="step-label">' . $this->t('step_account') . '</span></div>';
+        echo '<div class="progress-line"></div>';
+        echo '<div class="progress-step" data-step="2"><span class="step-num">2</span><span class="step-label">' . $this->t('step_profile') . '</span></div>';
+        echo '<div class="progress-line"></div>';
+        echo '<div class="progress-step" data-step="3"><span class="step-num">3</span><span class="step-label">' . $this->t('step_finish') . '</span></div>';
+        echo '</div>';
+
         echo '<form method="POST" action="index.php?action=inscription_submit" enctype="multipart/form-data" class="form-card">';
 
+        // Step 1
+        echo '<div class="signup-step" id="signup-step-1">';
         $this->champTexte('pseudonyme', 'pseudo', true);
         $this->champTexte('email', 'email', true, 'email');
         $this->champTexte('mot_de_passe', 'password', true, 'password');
         $this->champTexte('mot_de_passe_confirm', 'password_confirm', true, 'password');
-        $this->champTexte('nationalite', 'nationality');
+        echo '<button type="button" class="btn-primary btn-full" onclick="signupNext(2)">' . $this->t('next') . '</button>';
+        echo '</div>';
+
+        // Step 2
+        echo '<div class="signup-step" id="signup-step-2" style="display:none;">';
+        $this->champPays();
         $this->champTexte('date_naissance', 'birthdate', false, 'date');
-        $this->champTexte('ville', 'city');
 
         echo '<div class="form-group">';
         echo '<label>' . $this->t('spoken_languages') . '</label>';
@@ -285,6 +308,15 @@ class Vues
         echo '<textarea name="experiences_texte" id="experiences_texte" rows="3" placeholder="' . $this->t('experiences_placeholder') . '"></textarea>';
         echo '</div>';
 
+        echo '<div class="signup-nav">';
+        echo '<button type="button" class="btn-secondary btn-full" onclick="signupPrev(1)">' . $this->t('previous') . '</button>';
+        echo '<button type="button" class="btn-primary btn-full" onclick="signupNext(3)">' . $this->t('next') . '</button>';
+        echo '</div>';
+        echo '</div>';
+
+        // Step 3
+        echo '<div class="signup-step" id="signup-step-3" style="display:none;">';
+
         echo '<div class="form-group">';
         echo '<label for="photo">' . $this->t('photo') . '</label>';
         echo '<input type="file" name="photo" id="photo" accept="image/*">';
@@ -302,14 +334,49 @@ class Vues
         echo '<input type="hidden" name="longitude" id="longitude">';
 
         echo '<div class="form-group cgu-group">';
-        echo '<label class="checkbox-label"><input type="checkbox" name="cgu" value="1" required> ' . $this->t('accept_cgu');
+        echo '<label class="checkbox-label"><input type="checkbox" name="cgu" value="1" required> <span class="required-star">*</span> ' . $this->t('accept_cgu');
         echo ' (<a href="index.php?action=cgu" target="_blank">' . $this->t('cgu') . '</a>)';
         echo '</label></div>';
 
+        echo '<div class="signup-nav">';
+        echo '<button type="button" class="btn-secondary btn-full" onclick="signupPrev(2)">' . $this->t('previous') . '</button>';
         echo '<button type="submit" class="btn-primary btn-full">' . $this->t('register_btn') . '</button>';
+        echo '</div>';
+        echo '</div>';
+
         echo '</form>';
 
         echo '<p class="form-footer">' . $this->t('already_account') . ' <a href="index.php?action=connexion">' . $this->t('login') . '</a></p>';
+
+        echo '<script>
+        function signupNext(step) {
+            var current = step - 1;
+            var currentDiv = document.getElementById("signup-step-" + current);
+            var inputs = currentDiv.querySelectorAll("[required]");
+            for (var i = 0; i < inputs.length; i++) {
+                if (!inputs[i].value.trim()) { inputs[i].focus(); inputs[i].reportValidity(); return; }
+            }
+            currentDiv.style.display = "none";
+            document.getElementById("signup-step-" + step).style.display = "block";
+            document.querySelectorAll(".progress-step").forEach(function(el) {
+                el.classList.toggle("active", parseInt(el.dataset.step) <= step);
+            });
+            document.querySelectorAll(".progress-line").forEach(function(el, i) {
+                el.classList.toggle("active", i < step - 1);
+            });
+        }
+        function signupPrev(step) {
+            var current = step + 1;
+            document.getElementById("signup-step-" + current).style.display = "none";
+            document.getElementById("signup-step-" + step).style.display = "block";
+            document.querySelectorAll(".progress-step").forEach(function(el) {
+                el.classList.toggle("active", parseInt(el.dataset.step) <= step);
+            });
+            document.querySelectorAll(".progress-line").forEach(function(el, i) {
+                el.classList.toggle("active", i < step - 1);
+            });
+        }
+        </script>';
         echo '</section>';
 
         echo '<script>
@@ -346,7 +413,7 @@ class Vues
         echo '<section class="profil-section">';
         echo '<div class="profil-card">';
         echo '<div class="profil-header">';
-        $photo = $user['photo_profil'] ?: 'default.png';
+        $photo = $this->avatar($user['photo_profil'] ?? null);
         echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="Avatar" class="profil-avatar">';
         echo '<div class="profil-info">';
         echo '<h2>' . $this->esc($user['pseudonyme']) . '</h2>';
@@ -381,7 +448,10 @@ class Vues
         }
 
         if ($estMoi) {
+            echo '<div style="display:flex; gap:10px; margin-top:20px;">';
             echo '<a href="index.php?action=profil_edit" class="btn-primary">' . $this->t('edit_profile') . '</a>';
+            echo '<a href="index.php?action=amis" class="btn-secondary" style="padding:12px 22px;">' . $this->t('friends') . '</a>';
+            echo '</div>';
         } else {
             if ($relationAmitie === null) {
                 echo '<a href="index.php?action=demande_ami&id=' . $user['id'] . '" class="btn-primary">' . $this->t('add_friend') . '</a>';
@@ -401,7 +471,9 @@ class Vues
         echo '<form method="POST" action="index.php?action=profil_update" enctype="multipart/form-data" class="form-card">';
 
         $this->champTexte('pseudonyme', 'pseudo', true, 'text', $user['pseudonyme']);
-        $this->champTexte('nationalite', 'nationality', false, 'text', $user['nationalite']);
+
+        $this->champPays($user['nationalite'] ?? '');
+
         $this->champTexte('date_naissance', 'birthdate', false, 'date', $user['date_naissance']);
         $this->champTexte('ville', 'city', false, 'text', $user['ville']);
         $this->champTexte('mot_de_passe', 'password', false, 'password');
@@ -494,7 +566,7 @@ class Vues
             echo '<div class="users-grid">';
             foreach ($resultats as $u) {
                 echo '<div class="user-card">';
-                $photo = $u['photo_profil'] ?: 'default.png';
+                $photo = $this->avatar($u['photo_profil'] ?? null);
                 echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="user-card-avatar">';
                 echo '<h3>' . $this->esc($u['pseudonyme']) . '</h3>';
                 if (!empty($u['ville']))
@@ -520,7 +592,7 @@ class Vues
                 'lat' => (float) $u['latitude'],
                 'lng' => (float) $u['longitude'],
                 'ville' => $u['ville'] ?? '',
-                'photo' => $u['photo_profil'] ?: 'default.png'
+                'photo' => $u['photo_profil'] ?: 'default.webp'
             ];
         }, array_filter($resultats, function ($u) {
             return !empty($u['latitude']);
@@ -569,7 +641,7 @@ class Vues
             echo '<h3>' . $this->t('friend_requests') . ' (' . count($demandes) . ')</h3>';
             foreach ($demandes as $d) {
                 echo '<div class="demande-card">';
-                $photo = $d['photo_profil'] ?: 'default.png';
+                $photo = $this->avatar($d['photo_profil'] ?? null);
                 echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="mini-avatar">';
                 echo '<span>' . $this->esc($d['pseudonyme']) . '</span>';
                 echo '<a href="index.php?action=accepter_ami&id=' . $d['id'] . '" class="btn-accept">' . $this->t('accept') . '</a>';
@@ -586,7 +658,7 @@ class Vues
             echo '<div class="users-grid">';
             foreach ($amis as $a) {
                 echo '<div class="user-card">';
-                $photo = $a['photo_profil'] ?: 'default.png';
+                $photo = $this->avatar($a['photo_profil'] ?? null);
                 echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="user-card-avatar">';
                 echo '<h3>' . $this->esc($a['pseudonyme']) . '</h3>';
                 echo '<div class="user-card-actions">';
@@ -611,7 +683,7 @@ class Vues
             foreach ($conversations as $c) {
                 $classe = ($c['non_lus'] > 0) ? ' conv-unread' : '';
                 echo '<a href="index.php?action=ecrire&dest=' . $c['contact_id'] . '" class="conv-item' . $classe . '">';
-                $photo = $c['photo_profil'] ?: 'default.png';
+                $photo = $this->avatar($c['photo_profil'] ?? null);
                 echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="mini-avatar">';
                 echo '<div class="conv-info">';
                 echo '<strong>' . $this->esc($c['pseudonyme']) . '</strong>';
@@ -632,7 +704,7 @@ class Vues
         echo '<section class="chat-section">';
         echo '<div class="chat-header">';
         echo '<a href="index.php?action=messages" class="btn-back">&larr;</a>';
-        $photo = $contact['photo_profil'] ?: 'default.png';
+        $photo = $this->avatar($contact['photo_profil'] ?? null);
         echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="mini-avatar">';
         echo '<h3>' . $this->esc($contact['pseudonyme']) . '</h3>';
         echo '</div>';
@@ -812,7 +884,7 @@ class Vues
         foreach ($publications as $p) {
             echo '<div class="post-card">';
             echo '<div class="post-header">';
-            $photo = $p['photo_profil'] ?: 'default.png';
+            $photo = $this->avatar($p['photo_profil'] ?? null);
             echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="mini-avatar">';
             echo '<div>';
             echo '<a href="index.php?action=profil_voir&id=' . $p['auteur_id'] . '" class="post-author">' . $this->esc($p['pseudonyme']) . '</a>';
@@ -823,6 +895,8 @@ class Vues
             }
             if (!empty($p['image_url'])) {
                 echo '<img src="img/uploads/publications/' . $this->esc($p['image_url']) . '" class="post-image" style="width:100%; border-radius:12px; margin-top:12px; cursor:pointer;" onclick="window.open(this.src,\'_blank\')">';
+            } elseif (!empty($p['photo_publication'])) {
+                echo '<img src="img/uploads/publications/' . $this->esc($p['photo_publication']) . '" class="post-image" style="width:100%; border-radius:12px; margin-top:12px; cursor:pointer;" onclick="window.open(this.src,\'_blank\')">';
             }
             echo '</div>';
         }
@@ -834,7 +908,7 @@ class Vues
         echo '<h3>' . $this->t('new_members') . '</h3>';
         foreach ($nouveaux as $n) {
             echo '<a href="index.php?action=profil_voir&id=' . $n['id'] . '" class="sidebar-user">';
-            $photo = $n['photo_profil'] ?: 'default.png';
+            $photo = $this->avatar($n['photo_profil'] ?? null);
             echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="mini-avatar" style="width:36px;height:36px;">';
             echo '<span>' . $this->esc($n['pseudonyme']) . '</span>';
             echo '</a>';
@@ -935,7 +1009,7 @@ class Vues
     {
         echo '<section class="page-section">';
         echo '<div class="portfolio-header">';
-        $photo = $user['photo_profil'] ?: 'default.png';
+        $photo = $this->avatar($user['photo_profil'] ?? null);
         echo '<img src="img/avatars/' . $this->esc($photo) . '" alt="" class="profil-avatar">';
         echo '<h2>' . $this->esc($user['pseudonyme']) . '</h2>';
         echo '</div>';
@@ -1050,11 +1124,26 @@ class Vues
         return $faqs[$lang] ?? $faqs['fr'];
     }
 
+    private function champPays($selected = '')
+    {
+        $pays = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic","East Timor","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Ivory Coast","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Republic of the Congo","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Tajikistan","Tanzania","Thailand","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+        echo '<div class="form-group">';
+        echo '<label for="nationalite">' . $this->t('nationality') . '</label>';
+        echo '<select name="nationalite" id="nationalite">';
+        echo '<option value="">—</option>';
+        foreach ($pays as $p) {
+            $sel = ($selected === $p) ? ' selected' : '';
+            echo '<option value="' . $this->esc($p) . '"' . $sel . '>' . $this->esc($p) . '</option>';
+        }
+        echo '</select></div>';
+    }
+
     private function champTexte($name, $labelCle, $required = false, $type = 'text', $value = '')
     {
         $req = $required ? ' required' : '';
+        $star = $required ? ' <span class="required-star">*</span>' : '';
         echo '<div class="form-group">';
-        echo '<label for="' . $name . '">' . $this->t($labelCle) . '</label>';
+        echo '<label for="' . $name . '">' . $this->t($labelCle) . $star . '</label>';
         echo '<input type="' . $type . '" name="' . $name . '" id="' . $name . '" value="' . $this->esc($value) . '"' . $req . '>';
         echo '</div>';
     }

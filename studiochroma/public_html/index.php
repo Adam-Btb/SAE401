@@ -192,7 +192,7 @@ switch ($action) {
         $mesAmis = $ami->getAmis($userId);
         $amisIds = array_column($mesAmis, 'id');
         $publications = $utilisateur->getPublications($userId, $amisIds);
-        $nouveaux = $utilisateur->getDerniersInscrits(6);
+        $nouveaux = $ami->getSuggestionsAmis($userId, 6);
         $eventsPublics = $evenement->getEvenementsPublicsConnectes($userId, $amisIds);
         $vue->afficherFeed($publications, $nouveaux, $eventsPublics);
         break;

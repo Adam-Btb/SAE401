@@ -25,11 +25,14 @@ class Message {
         if (!empty($fileData['name']) && $fileData['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                $pieceJointe = uniqid('msg_') . '.' . $ext;
-                if (!is_dir('img/uploads/messages')) {
-                    mkdir('img/uploads/messages', 0777, true);
+                $newName = uniqid('msg_') . '.' . $ext;
+                $targetDir = __DIR__ . '/../img/uploads/messages';
+                if (!is_dir($targetDir)) mkdir($targetDir, 0775, true);
+                if (move_uploaded_file($fileData['tmp_name'], $targetDir . '/' . $newName)) {
+                    $pieceJointe = $newName;
+                } else {
+                    error_log('[StudioChroma] Message attachment upload failed → ' . $targetDir);
                 }
-                move_uploaded_file($fileData['tmp_name'], 'img/uploads/messages/' . $pieceJointe);
             }
         }
 
@@ -62,7 +65,7 @@ class Message {
     }
 
     public function getConversations($userId) {
-        $sql = "SELECT m2.*, u.pseudonyme, u.photo_profil,
+        $sql = "SELECT m2.*, conv.contact_id, u.pseudonyme, u.photo_profil,
                 (SELECT COUNT(*) FROM messages WHERE expediteur_id = u.id AND destinataire_id = :uid3 AND lu = 0) AS non_lus
                 FROM (
                     SELECT

@@ -41,7 +41,7 @@ class Langue
             'friends' => 'My Network',
             'feed' => 'Feed',
 
-            'hero_title' => 'Share your art. <em>Meet</em> your community.',
+            'hero_title' => '<em>Share</em> your art. <em>Meet</em> your community.',
             'hero_subtitle' => 'Crilay is the intergenerational social network where artists of all ages share their creative techniques and know-how beyond borders.',
             'discover_video' => 'Discover Crilay in video',
             'why_title' => 'Why join Crilay?',
@@ -77,6 +77,11 @@ class Langue
             'select_tags' => 'Your artistic disciplines',
             'accept_cgu' => 'I accept the terms of use',
             'register_btn' => 'Create my account',
+            'next' => 'Next',
+            'previous' => 'Previous',
+            'step_account' => 'Account',
+            'step_profile' => 'Profile',
+            'step_finish' => 'Finish',
             'already_account' => 'Already have an account?',
 
             'login_title' => 'Sign in',
@@ -124,7 +129,7 @@ class Langue
             'write_post' => 'What\'s new in your studio?',
             'publish' => 'Post',
             'no_posts' => 'No posts yet. Be the first!',
-            'new_members' => 'New members',
+            'new_members' => 'Friend suggestions',
             'upcoming_events' => 'Upcoming events',
 
             'agenda_title' => 'My Calendar',
@@ -283,6 +288,11 @@ class Langue
             'select_tags' => 'Disiplinat tuaja artistike',
             'accept_cgu' => 'Pranoj kushtet e përgjithshme të përdorimit',
             'register_btn' => 'Krijo llogarinë time',
+            'next' => 'Tjetër',
+            'previous' => 'Mbrapa',
+            'step_account' => 'Llogaria',
+            'step_profile' => 'Profili',
+            'step_finish' => 'Përfundo',
             'already_account' => 'Keni tashmë një llogari?',
 
             'login_title' => 'Hyrje',
@@ -330,7 +340,7 @@ class Langue
             'write_post' => 'Ndani diçka me komunitetin...',
             'publish' => 'Publiko',
             'no_posts' => 'Asnjë publikim ende. Jini i pari!',
-            'new_members' => 'Anëtarë të rinj',
+            'new_members' => 'Sugjerime miqsh',
             'upcoming_events' => 'Ngjarjet e ardhshme',
 
             'agenda_title' => 'Axhenda ime',
@@ -489,6 +499,11 @@ class Langue
             'select_tags' => 'Bộ môn nghệ thuật của bạn',
             'accept_cgu' => 'Tôi chấp nhận điều khoản sử dụng',
             'register_btn' => 'Tạo tài khoản',
+            'next' => 'Tiếp theo',
+            'previous' => 'Quay lại',
+            'step_account' => 'Tài khoản',
+            'step_profile' => 'Hồ sơ',
+            'step_finish' => 'Hoàn tất',
             'already_account' => 'Đã có tài khoản?',
 
             'login_title' => 'Đăng nhập',
@@ -536,7 +551,7 @@ class Langue
             'write_post' => 'Chia sẻ điều gì đó với cộng đồng...',
             'publish' => 'Đăng',
             'no_posts' => 'Chưa có bài đăng nào. Hãy là người đầu tiên!',
-            'new_members' => 'Thành viên mới',
+            'new_members' => 'Gợi ý kết bạn',
             'upcoming_events' => 'Sự kiện sắp tới',
 
             'agenda_title' => 'Lịch của tôi',
